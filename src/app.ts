@@ -26,6 +26,14 @@ const createApp = (): Application => {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+  // Handle common browser probes (favicon & DevTools)
+  app.get('/favicon.ico', (_req, res) => {
+    res.status(204).end();
+  });
+  app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
+    res.status(204).end();
+  });
+
   // Root welcome endpoint
   app.get('/', (_req, res) => {
     res.json({

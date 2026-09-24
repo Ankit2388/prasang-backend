@@ -29,9 +29,13 @@ export const errorHandler: ErrorRequestHandler = (
     message = err.message;
   }
 
-  logger.error(`[${_req.method}] ${_req.path} >> Status: ${statusCode} - ${message}`);
-  if (err.stack) {
-    logger.error(err.stack);
+  if (statusCode >= StatusCodes.INTERNAL_SERVER_ERROR) {
+    logger.error(`[${_req.method}] ${_req.path} >> Status: ${statusCode} - ${message}`);
+    if (err.stack) {
+      logger.error(err.stack);
+    }
+  } else {
+    logger.warn(`[${_req.method}] ${_req.path} >> Status: ${statusCode} - ${message}`);
   }
 
   res.status(statusCode).json({
