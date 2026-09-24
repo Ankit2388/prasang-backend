@@ -21,4 +21,3 @@ router.use('/health', healthRoutes);
 router.use('/users', userRoutes);
 
 export const v1Router = router;
-

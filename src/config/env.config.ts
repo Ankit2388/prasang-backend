@@ -16,6 +16,7 @@ const envSchema = z.object({
   API_PREFIX: z.string().default('/api/v1'),
   CORS_ORIGIN: z.string().default('*'),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
+  MONGODB_URI: z.string().min(1, { message: 'MONGODB_URI environment variable is required' }),
 });
 
 // Validate environment variables

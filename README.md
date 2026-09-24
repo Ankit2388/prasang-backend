@@ -162,6 +162,7 @@ Environment variables are defined in `.env.development` (or `.env.production`) a
 | `API_PREFIX` | `string` | `/api/v1` | Base API routing prefix |
 | `CORS_ORIGIN` | `string` | `*` | Allowed CORS origins |
 | `LOG_LEVEL` | `error \| warn \| info \| http \| debug` | `debug` | Winston logger verbosity |
+| `MONGODB_URI` | `string` | *(Required)* | MongoDB Atlas SRV connection string |
 
 ---
 
@@ -200,6 +201,7 @@ prasang/
     ├── config/                 # Application environment and service configurations
     │   ├── env.config.ts       # Strongly-typed Zod environment validator
     │   ├── logger.config.ts    # Winston logger setup
+    │   ├── database.config.ts  # Mongoose MongoDB Atlas connection manager
     │   └── index.ts            # Centralized config exports
     ├── constants/              # System-wide constants & status codes
     │   ├── http-status.ts      # Standard HTTP Status codes re-export
@@ -404,14 +406,58 @@ export const v1Router = router;
 
 ---
 
-## 🗄️ Database Configuration & Integration
+## 🗄️ Database Configuration & Integration (MongoDB Atlas)
 
-The architecture is ORM / ODM agnostic and prepared for database connection (such as **Prisma**, **Mongoose / MongoDB**, **TypeORM**, or **Kysely**).
+The Prasang backend connects to **MongoDB Atlas** using **Mongoose** (`^8.x`). Database connections are managed centrally in `src/config/database.config.ts` and initialized asynchronously during application startup in `src/server.ts`.
 
-### Recommended Integration Steps
-1. Place database connection configuration inside `src/config/database.config.ts`.
-2. Initialize database connection inside `src/server.ts` before calling `app.listen()`.
-3. In domain modules (`src/modules/<feature>/`), create `<feature>.model.ts` or database repository files.
+### 1. MongoDB Atlas Setup & Configuration
+
+1. **Obtain Connection String from MongoDB Atlas**:
+   - Go to MongoDB Atlas Console -> Database -> Connect.
+   - Choose **Drivers** (Node.js).
+   - Copy the SRV connection string:
+     ```text
+     mongodb+srv://<db_username>:<db_password>@prasang-clr.oejdjug.mongodb.net/prasang?retryWrites=true&w=majority&appName=prasang-clr
+     ```
+
+2. **Configure Environment Variables**:
+   - Open `.env.development` (or create it from `.env.example`).
+   - Replace `<db_username>` with your Atlas database username.
+   - Replace `<db_password>` with your Atlas database user password (ensure special characters in passwords are URL-encoded if necessary).
+   - Set database name (e.g., `prasang` or `prasang_dev`).
+
+   ```env
+   MONGODB_URI=mongodb+srv://myDbUser:mySecretPassword@prasang-clr.oejdjug.mongodb.net/prasang?retryWrites=true&w=majority&appName=prasang-clr
+   ```
+
+3. **Configure Atlas Network Access (IP Whitelist)**:
+   - In MongoDB Atlas Console, go to **Network Access** under Security.
+   - Click **Add IP Address**.
+   - For local development, add your current IP address (or `0.0.0.0/0` for development access).
+
+4. **Startup & Shutdown Behavior**:
+   - The application connects to MongoDB Atlas *before* launching the Express HTTP server.
+   - If the connection fails, the boot process halts with structured error logging.
+   - During SIGINT or SIGTERM signals, the database connection is closed gracefully before process termination.
+
+5. **Monitoring Database Health**:
+   - Check status via GET endpoint: `http://localhost:5001/api/v1/health`
+   - Response envelope includes database status:
+     ```json
+     {
+       "success": true,
+       "statusCode": 200,
+       "message": "Health status retrieved successfully",
+       "data": {
+         "status": "UP",
+         "database": {
+           "connected": true,
+           "readyState": 1,
+           "stateLabel": "connected"
+         }
+       }
+     }
+     ```
 
 ---
 
