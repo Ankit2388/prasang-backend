@@ -12,9 +12,13 @@ const userSchema = new Schema<IUserDocument>(
       trim: true,
       index: true,
     },
-    name: {
+    firstName: {
       type: String,
-      required: [true, 'Name is required'],
+      required: [true, 'First name is required'],
+      trim: true,
+    },
+    lastName: {
+      type: String,
       trim: true,
     },
     email: {

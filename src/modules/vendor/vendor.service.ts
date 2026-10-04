@@ -1,11 +1,21 @@
 import { VendorModel } from './vendor.model.js';
-import { IVendorDocument } from './vendor.interface.js';
+import { IVendorDocument, CreateVendorDTO } from './vendor.interface.js';
+import { BusinessModel } from '../business/business.model.js';
 import { ApiError } from '../../utils/api-error.js';
 import { StatusCodes } from '../../constants/index.js';
 
 export class VendorService {
   public async getVendorByUserId(userId: string): Promise<IVendorDocument | null> {
-    return VendorModel.findOne({ userId }).populate('userId', '-password');
+    const vendor = await VendorModel.findOne({ userId }).populate('userId', '-password');
+    if (!vendor) return null;
+
+    const business = await BusinessModel.findOne({ vendorId: vendor._id });
+    const vendorObj = vendor.toObject() as IVendorDocument;
+    if (business) {
+      vendorObj.business = business;
+    }
+
+    return vendorObj;
   }
 
   public async getVendorById(id: string): Promise<IVendorDocument> {
@@ -13,23 +23,29 @@ export class VendorService {
     if (!vendor) {
       throw new ApiError(StatusCodes.NOT_FOUND, `Vendor with ID ${id} not found`);
     }
-    return vendor;
+
+    const business = await BusinessModel.findOne({ vendorId: vendor._id });
+    const vendorObj = vendor.toObject() as IVendorDocument;
+    if (business) {
+      vendorObj.business = business;
+    }
+
+    return vendorObj;
   }
 
-  public async getAllApprovedVendors(): Promise<IVendorDocument[]> {
-    return VendorModel.find({ status: 'APPROVED' })
-      .populate('userId', 'name mobileNumber email')
-      .sort({ createdAt: -1 });
+  public async getAllApprovedVendors(): Promise<unknown[]> {
+    const approvedBusinesses = await BusinessModel.find({ status: 'APPROVED' })
+      .populate({
+        path: 'vendorId',
+        select: 'firstName lastName status userId createdAt updatedAt',
+        populate: { path: 'userId', select: 'firstName lastName mobileNumber email' },
+      })
+      .sort({ averageRating: -1, createdAt: -1 });
+
+    return approvedBusinesses;
   }
 
-  public async createVendorProfile(data: {
-    userId: string;
-    businessName: string;
-    ownerName: string;
-    city?: string;
-    address?: string;
-    cuisineTypes?: string[];
-  }): Promise<IVendorDocument> {
+  public async createVendorProfile(data: CreateVendorDTO): Promise<IVendorDocument> {
     const existing = await VendorModel.findOne({ userId: data.userId });
     if (existing) {
       throw new ApiError(
@@ -40,15 +56,28 @@ export class VendorService {
 
     const vendor = new VendorModel({
       userId: data.userId,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      status: data.status || 'ACTIVE',
+    });
+
+    const savedVendor = await vendor.save();
+
+    const business = new BusinessModel({
+      vendorId: savedVendor._id,
       businessName: data.businessName,
-      ownerName: data.ownerName,
       city: data.city,
       address: data.address,
       cuisineTypes: data.cuisineTypes || [],
       status: 'APPROVED',
     });
 
-    return vendor.save();
+    const savedBusiness = await business.save();
+
+    const vendorObj = savedVendor.toObject() as IVendorDocument;
+    vendorObj.business = savedBusiness;
+
+    return vendorObj;
   }
 }
 

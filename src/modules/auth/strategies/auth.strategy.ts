@@ -29,7 +29,8 @@ export interface IAuthStrategy {
 const mapUserToDTO = (user: IUserDocument): UserResponseDTO => ({
   id: user._id.toString(),
   mobileNumber: user.mobileNumber,
-  name: user.name,
+  firstName: user.firstName,
+  lastName: user.lastName,
   email: user.email,
   role: user.role,
   isActive: user.isActive,
@@ -64,7 +65,8 @@ export class PasswordAuthStrategy implements IAuthStrategy {
 
     const user = await userService.createUser({
       mobileNumber: data.mobileNumber,
-      name: data.name,
+      firstName: data.firstName,
+      lastName: data.lastName,
       password: data.password,
       email: data.email,
       role: USER_ROLES.USER,
@@ -108,7 +110,8 @@ export class PasswordAuthStrategy implements IAuthStrategy {
 
     const user = await userService.createUser({
       mobileNumber: data.mobileNumber,
-      name: data.name,
+      firstName: data.firstName,
+      lastName: data.lastName,
       password: data.password,
       email: data.email,
       role: USER_ROLES.VENDOR,
@@ -116,8 +119,9 @@ export class PasswordAuthStrategy implements IAuthStrategy {
 
     const vendor = await vendorService.createVendorProfile({
       userId: user._id.toString(),
+      firstName: data.firstName,
+      lastName: data.lastName,
       businessName: data.businessName,
-      ownerName: data.ownerName || data.name,
       city: data.city,
       address: data.address,
       cuisineTypes: data.cuisineTypes,
@@ -184,7 +188,8 @@ export class OtpAuthStrategy implements IAuthStrategy {
   public async registerUser(data: RegisterUserDTO): Promise<AuthResult> {
     const user = await userService.createUser({
       mobileNumber: data.mobileNumber,
-      name: data.name,
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       role: USER_ROLES.USER,
     });
@@ -210,7 +215,8 @@ export class OtpAuthStrategy implements IAuthStrategy {
       // Auto-register user on first successful OTP login if user doesn't exist yet
       user = await userService.createUser({
         mobileNumber: data.mobileNumber,
-        name: `User ${data.mobileNumber.slice(-4)}`,
+        firstName: 'User',
+        lastName: data.mobileNumber.slice(-4),
         role: USER_ROLES.USER,
       });
     }
@@ -225,15 +231,17 @@ export class OtpAuthStrategy implements IAuthStrategy {
   public async registerVendor(data: RegisterVendorDTO): Promise<AuthResult> {
     const user = await userService.createUser({
       mobileNumber: data.mobileNumber,
-      name: data.name,
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       role: USER_ROLES.VENDOR,
     });
 
     const vendor = await vendorService.createVendorProfile({
       userId: user._id.toString(),
+      firstName: data.firstName,
+      lastName: data.lastName,
       businessName: data.businessName,
-      ownerName: data.ownerName || data.name,
       city: data.city,
       address: data.address,
       cuisineTypes: data.cuisineTypes,

@@ -42,7 +42,8 @@ export class UserService {
 
     const user = new UserModel({
       mobileNumber: data.mobileNumber,
-      name: data.name,
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email ? data.email.toLowerCase() : undefined,
       password: data.password,
       role: data.role,

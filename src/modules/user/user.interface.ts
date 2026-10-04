@@ -3,7 +3,8 @@ import { UserRole } from '../../constants/roles.js';
 
 export interface IUser {
   mobileNumber: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
   email?: string;
   password?: string;
   role: UserRole;
@@ -19,7 +20,8 @@ export interface IUserDocument extends IUser, Document {
 
 export interface CreateUserDTO {
   mobileNumber: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
   password?: string;
   email?: string;
   role?: UserRole;
@@ -28,7 +30,8 @@ export interface CreateUserDTO {
 export interface UserResponseDTO {
   id: string;
   mobileNumber: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
   email?: string;
   role: UserRole;
   isActive: boolean;

@@ -4,7 +4,8 @@ import { OtpPurpose } from './otp.interface.js';
 
 export interface RegisterUserDTO {
   mobileNumber: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
   password?: string;
   email?: string;
 }
@@ -17,11 +18,11 @@ export interface LoginUserDTO {
 
 export interface RegisterVendorDTO {
   mobileNumber: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
   password?: string;
   email?: string;
   businessName: string;
-  ownerName?: string;
   city?: string;
   address?: string;
   cuisineTypes?: string[];

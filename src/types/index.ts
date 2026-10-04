@@ -4,7 +4,8 @@ import { UserRole } from '../constants/roles.js';
 export interface AuthUserPayload {
   id: string;
   mobileNumber: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
   email?: string;
   role: UserRole;
 }

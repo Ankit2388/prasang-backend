@@ -39,7 +39,8 @@ export const authenticate = async (
     req.user = {
       id: user._id.toString(),
       mobileNumber: user.mobileNumber,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
     };
@@ -77,7 +78,8 @@ export const optionalAuthenticate = async (
         req.user = {
           id: user._id.toString(),
           mobileNumber: user.mobileNumber,
-          name: user.name,
+          firstName: user.firstName,
+      lastName: user.lastName,
           email: user.email,
           role: user.role,
         };

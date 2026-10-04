@@ -13,10 +13,15 @@ export class VendorController {
         res,
         isAnonymous
           ? 'Vendors retrieved for guest/anonymous user'
-          : `Vendors retrieved for authenticated user (${req.user?.name})`,
+          : `Vendors retrieved for authenticated user (${req.user?.firstName})`,
         vendors,
         200,
-        { isAnonymous, user: req.user ? { name: req.user.name, role: req.user.role } : null },
+        {
+          isAnonymous,
+          user: req.user
+            ? { firstName: req.user.firstName, lastName: req.user.lastName, role: req.user.role }
+            : null,
+        },
       );
     },
   );

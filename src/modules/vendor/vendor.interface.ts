@@ -1,29 +1,28 @@
 import { Document, Types } from 'mongoose';
+import { IBusinessDocument } from '../business/business.interface.js';
 
-export type VendorStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type VendorAccountStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
 export interface IVendor {
   userId: Types.ObjectId | string;
-  businessName: string;
-  ownerName: string;
-  city?: string;
-  address?: string;
-  cuisineTypes?: string[];
-  status: VendorStatus;
+  firstName: string;
+  lastName?: string;
+  status: VendorAccountStatus;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface IVendorDocument extends IVendor, Document {}
+export interface IVendorDocument extends IVendor, Document {
+  business?: IBusinessDocument;
+}
 
 export interface CreateVendorDTO {
-  mobileNumber: string;
-  password?: string;
-  name: string;
+  userId: string;
+  firstName: string;
+  lastName?: string;
   businessName: string;
-  ownerName?: string;
   city?: string;
   address?: string;
   cuisineTypes?: string[];
-  email?: string;
+  status?: VendorAccountStatus;
 }

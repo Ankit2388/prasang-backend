@@ -14,7 +14,8 @@ const registerUserSchema = z.object({
     mobileNumber: z
       .string()
       .regex(mobileRegex, 'Invalid mobile number. Must be a valid 10-digit Indian mobile number'),
-    name: z.string().min(2, 'Name must be at least 2 characters long'),
+    firstName: z.string().min(2, 'First name must be at least 2 characters long'),
+    lastName: z.string().optional(),
     password: z.string().min(6, 'Password must be at least 6 characters long').optional(),
     email: z.string().email('Invalid email address format').optional(),
   }),
@@ -35,11 +36,11 @@ const registerVendorSchema = z.object({
     mobileNumber: z
       .string()
       .regex(mobileRegex, 'Invalid mobile number. Must be a valid 10-digit Indian mobile number'),
-    name: z.string().min(2, 'Name must be at least 2 characters long'),
+    firstName: z.string().min(2, 'First name must be at least 2 characters long'),
+    lastName: z.string().optional(),
     password: z.string().min(6, 'Password must be at least 6 characters long').optional(),
     email: z.string().email('Invalid email address format').optional(),
     businessName: z.string().min(2, 'Business name must be at least 2 characters long'),
-    ownerName: z.string().optional(),
     city: z.string().optional(),
     address: z.string().optional(),
     cuisineTypes: z.array(z.string()).optional(),

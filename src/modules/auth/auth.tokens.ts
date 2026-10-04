@@ -10,7 +10,8 @@ export const generateAccessToken = (user: IUserDocument): string => {
   const payload: AuthUserPayload = {
     id: user._id.toString(),
     mobileNumber: user.mobileNumber,
-    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     role: user.role,
   };

@@ -10,32 +10,19 @@ const vendorSchema = new Schema<IVendorDocument>(
       unique: true,
       index: true,
     },
-    businessName: {
+    firstName: {
       type: String,
-      required: [true, 'Business name is required'],
+      required: [true, 'First name is required'],
       trim: true,
     },
-    ownerName: {
-      type: String,
-      required: [true, 'Owner name is required'],
-      trim: true,
-    },
-    city: {
+    lastName: {
       type: String,
       trim: true,
-    },
-    address: {
-      type: String,
-      trim: true,
-    },
-    cuisineTypes: {
-      type: [String],
-      default: [],
     },
     status: {
       type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED'],
-      default: 'APPROVED',
+      enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED'],
+      default: 'ACTIVE',
       index: true,
     },
   },
