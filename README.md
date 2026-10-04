@@ -16,6 +16,7 @@
 - [Folder Structure](#folder-structure)
 - [Design Patterns & Principles](#design-patterns--principles)
 - [API Structure & Versioning](#api-structure--versioning)
+- [Interactive API Documentation (Swagger / OpenAPI)](#interactive-api-documentation-swagger--openapi)
 - [Error & Response Handling](#error--response-handling)
 - [Creating & Adding New Modules (Developer Guide)](#creating--adding-new-modules-developer-guide)
 - [Database Configuration & Integration](#database-configuration--integration)
@@ -286,6 +287,51 @@ All endpoints are versioned with the `/api/v1` prefix by default.
   ]
 }
 ```
+
+---
+
+## 📖 Interactive API Documentation (Swagger / OpenAPI)
+
+`prasang-server` includes full **Swagger / OpenAPI 3.0** interactive documentation.
+
+### 🌐 Swagger URL
+- **Swagger UI Interface**: [http://localhost:5001/api-docs](http://localhost:5001/api-docs)
+- **Raw OpenAPI JSON Spec**: [http://localhost:5001/api-docs.json](http://localhost:5001/api-docs.json)
+
+---
+
+### 🚀 How to Access & Use Swagger UI
+
+1. **Start the Backend Server**:
+   ```bash
+   npm run dev
+   # or
+   npm start
+   ```
+
+2. **Open Swagger UI in Browser**:
+   Navigate to `http://localhost:5001/api-docs` in your browser.
+
+3. **How to Use the Authorize Button (JWT Bearer Token)**:
+   - Perform user or vendor registration/login via `/api/v1/auth/login/user`, `/api/v1/auth/login/vendor`, or `/api/v1/auth/login/admin`.
+   - Copy the `accessToken` string returned in the JSON response payload.
+   - Click the green **Authorize** button at the top right of Swagger UI.
+   - Paste the token into the `Value` field for **bearerAuth** (Note: Do *not* include the word `Bearer `, Swagger UI automatically prepends `Bearer ` to the header).
+   - Click **Authorize**, then click **Close**.
+   - All subsequent protected requests executed in Swagger UI will now automatically attach the `Authorization: Bearer <JWT_TOKEN>` header!
+
+4. **How to Use "Try it out" & Execute an API**:
+   - Expand any endpoint card (e.g. `POST /api/v1/auth/register/user` or `GET /api/v1/users`).
+   - Click the **Try it out** button in the top right corner of the endpoint section.
+   - Edit the JSON payload in the **Request body** editor or fill in path/query parameters.
+   - Click the blue **Execute** button to submit the live HTTP request.
+
+5. **Viewing Request & Response Details**:
+   - **Curl Command**: View the exact generated `curl` command for CLI testing.
+   - **Request URL**: View the target endpoint URL.
+   - **Server Response**: Inspect the HTTP Status Code (`200 OK`, `201 Created`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `409 Conflict`).
+   - **Response Body**: Inspect the formatted JSON payload matching `ApiResponse` / `ApiError` envelopes.
+   - **Response Headers**: Inspect returned response headers (`Content-Type`, `Content-Security-Policy`, etc.).
 
 ---
 
