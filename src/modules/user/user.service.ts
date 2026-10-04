@@ -1,49 +1,58 @@
-import { User, CreateUserDTO } from './user.interface.js';
+import { UserModel } from './user.model.js';
+import { IUserDocument, CreateUserDTO } from './user.interface.js';
 import { ApiError } from '../../utils/api-error.js';
 import { StatusCodes } from '../../constants/index.js';
 
 export class UserService {
-  // In-memory collection placeholder until database integration
-  private users: User[] = [
-    {
-      id: 'usr_1',
-      name: 'System Admin',
-      email: 'admin@prasang.com',
-      role: 'admin',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
-
-  public async getAllUsers(): Promise<User[]> {
-    return this.users;
+  public async getAllUsers(): Promise<IUserDocument[]> {
+    return UserModel.find().sort({ createdAt: -1 });
   }
 
-  public async getUserById(id: string): Promise<User> {
-    const user = this.users.find((u) => u.id === id);
+  public async getUserById(id: string): Promise<IUserDocument> {
+    const user = await UserModel.findById(id);
     if (!user) {
       throw new ApiError(StatusCodes.NOT_FOUND, `User with ID ${id} not found`);
     }
     return user;
   }
 
-  public async createUser(data: CreateUserDTO): Promise<User> {
-    const existingUser = this.users.find((u) => u.email === data.email);
-    if (existingUser) {
-      throw new ApiError(StatusCodes.CONFLICT, `User with email ${data.email} already exists`);
+  public async getUserByMobile(mobileNumber: string): Promise<IUserDocument | null> {
+    return UserModel.findOne({ mobileNumber });
+  }
+
+  public async getUserByMobileWithPassword(mobileNumber: string): Promise<IUserDocument | null> {
+    return UserModel.findOne({ mobileNumber }).select('+password');
+  }
+
+  public async createUser(data: CreateUserDTO): Promise<IUserDocument> {
+    const existingMobile = await UserModel.findOne({ mobileNumber: data.mobileNumber });
+    if (existingMobile) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        `User with mobile number ${data.mobileNumber} already exists`,
+      );
     }
 
-    const newUser: User = {
-      id: `usr_${Date.now()}`,
-      name: data.name,
-      email: data.email,
-      role: data.role || 'user',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    if (data.email) {
+      const existingEmail = await UserModel.findOne({ email: data.email.toLowerCase() });
+      if (existingEmail) {
+        throw new ApiError(StatusCodes.CONFLICT, `User with email ${data.email} already exists`);
+      }
+    }
 
-    this.users.push(newUser);
-    return newUser;
+    const user = new UserModel({
+      mobileNumber: data.mobileNumber,
+      name: data.name,
+      email: data.email ? data.email.toLowerCase() : undefined,
+      password: data.password,
+      role: data.role,
+    });
+
+    return user.save();
+  }
+
+  public async updateLastLogin(id: string): Promise<void> {
+    await UserModel.findByIdAndUpdate(id, { lastLoginAt: new Date() });
   }
 }
 

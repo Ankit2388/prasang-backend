@@ -17,6 +17,13 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('*'),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
   MONGODB_URI: z.string().min(1, { message: 'MONGODB_URI environment variable is required' }),
+  AUTH_MODE: z.enum(['password', 'otp']).default('password'),
+  JWT_SECRET: z.string().default('prasang_jwt_secret_key_development_2026'),
+  JWT_EXPIRES_IN: z.string().default('1d'),
+  JWT_REFRESH_SECRET: z.string().default('prasang_jwt_refresh_secret_key_development_2026'),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  OTP_EXPIRES_IN_MINUTES: z.coerce.number().default(5),
+  DEFAULT_DEV_OTP: z.string().default('123456'),
 });
 
 // Validate environment variables
