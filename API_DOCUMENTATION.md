@@ -20,9 +20,13 @@
    - [2.1 Server & System Health Module](#21-server--system-health-module)
    - [2.2 Authentication & OTP Module](#22-authentication--otp-module)
    - [2.3 User Management Module](#23-user-management-module)
-   - [2.4 Vendor & Catering Module](#24-vendor--catering-module)
-   - [2.5 Super Admin Module](#25-super-admin-module)
+   - [2.4 Vendor Module](#24-vendor-module)
+   - [2.5 Business Management Module](#25-business-management-module)
+   - [2.6 Menu & MenuItem Module](#26-menu--menuitem-module)
+   - [2.7 Review & Feedback Module](#27-review--feedback-module)
+   - [2.8 Super Admin Module](#28-super-admin-module)
 3. [Complete API Summary Matrix](#3-complete-api-summary-matrix)
+
 
 ---
 
@@ -43,8 +47,11 @@ The backend is structured cleanly using **Domain-Driven Modular Architecture**:
 1. **System Health & Server Info (`health`)**: Real-time health monitoring, database readiness checks, process uptime, and memory usage analytics.
 2. **Authentication & Identity (`auth`)**: Dual-strategy authentication (`password` for dev & `otp` for production), mobile-based auth, JWT access/refresh token rotation, role assignment, and OTP lifecycle management.
 3. **User Domain (`user`)**: Core user account management, role escalation, and user lookup APIs.
-4. **Vendor / Catering Domain (`vendor`)**: Public vendor discovery, guest browsing support, estimation request submission, and vendor dashboard analytics.
-5. **Super Admin Domain (`admin`)**: Platform-wide metrics, overall user & vendor statistics, and platform monitoring.
+4. **Vendor Domain (`vendor`)**: Vendor account identity, owner details, estimation requests, and vendor portal dashboard analytics.
+5. **Business Domain (`business`)**: Operating profile, location, capacity limits, business hours, search/filtering, and status moderation.
+6. **Menu & MenuItem Domain (`menu`)**: Multi-tiered catering catalog management (Menus & Menu Items).
+7. **Review & Feedback Domain (`review`)**: Customer ratings, reviews, and real-time business rating aggregation.
+8. **Super Admin Domain (`admin`)**: Platform-wide metrics, overall user & vendor statistics, and platform monitoring.
 
 ---
 
@@ -99,24 +106,24 @@ The backend is structured cleanly using **Domain-Driven Modular Architecture**:
          ┌─────────────────────────────┼─────────────────────────────┐
          ▼                             ▼                             ▼
 ┌───────────────────┐        ┌───────────────────┐         ┌───────────────────┐
-│   Auth Module     │        │    User Module    │         │   Vendor Module   │
+│   Auth Module     │        │  Business Module  │         │  Menu & Review    │
 │ ┌───────────────┐ │        │ ┌───────────────┐ │         │ ┌───────────────┐ │
-│ │ auth.route.ts │ │        │ │ user.route.ts │ │         │ │vendor.route.ts│ │
+│ │ auth.route.ts │ │        │ │business.route │ │         │ │ menu.route.ts │ │
 │ └───────┬───────┘ │        │ └───────┬───────┘ │         │ └───────┬───────┘ │
-│         │ (Zod)   │        │         │ (Zod)   │         │         │         │
+│         │ (Zod)   │        │         │ (Zod)   │         │         │ (Zod)   │
 │         ▼         │        │         ▼         │         │         ▼         │
 │ ┌───────────────┐ │        │ ┌───────────────┐ │         │ ┌───────────────┐ │
-│ │auth.controller│ │        │ │user.controller│ │         │ │vendor.cntrller│ │
-│ └───────┬───────┘ │        │ └───────┬───────┘ │         │ └───────┬───────┘ │
-│         │         │        │         │         │         │         │         │
-│         ▼         │        │         ▼         │         │         ▼         │
-│ ┌───────────────┐ │        │ ┌───────────────┐ │         │ ┌───────────────┐ │
-│ │ auth.service  │ │        │ │ user.service  │ │         │ │ vendor.service│ │
+│ │auth.controller│ │        │ │business.cntrl │ │         │ │menu.controller│ │
 │ └───────┬───────┘ │        │ └───────┬───────┘ │         │ └───────┬───────┘ │
 │         │         │        │         │         │         │         │         │
 │         ▼         │        │         ▼         │         │         ▼         │
 │ ┌───────────────┐ │        │ ┌───────────────┐ │         │ ┌───────────────┐ │
-│ │  otp.model.ts │ │        │ │ user.model.ts │ │         │ │vendor.model.ts│ │
+│ │ auth.service  │ │        │ │business.servic│ │         │ │ menu.service  │ │
+│ └───────┬───────┘ │        │ └───────┬───────┘ │         │ └───────┬───────┘ │
+│         │         │        │         │         │         │         │         │
+│         ▼         │        │         ▼         │         │         ▼         │
+│ ┌───────────────┐ │        │ ┌───────────────┐ │         │ ┌───────────────┐ │
+│ │  otp.model.ts │ │        │ │business.model │ │         │ │ menu.model.ts │ │
 │ └───────────────┘ │        │ └───────────────┘ │         │ └───────────────┘ │
 └───────────────────┘        └───────────────────┘         └───────────────────┘
 ```
@@ -133,7 +140,7 @@ The system connects to **MongoDB Atlas** using **Mongoose ODM**. Connection is m
   - `mobileNumber` (`String`, required, unique, indexed): 10-digit Indian mobile number.
   - `name` (`String`, required, trimmed): User full name.
   - `email` (`String`, unique, sparse, lowercase): Optional user email address.
-  - `password` (`String`, selected: `false`): Hashed password using bcrypt (only retrieved when explicitly requested with `.select('+password')`).
+  - `password` (`String`, selected: `false`): Hashed password using bcrypt.
   - `role` (`String`, enum: `['SUPER_ADMIN', 'VENDOR', 'USER']`, default: `'USER'`, indexed).
   - `isActive` (`Boolean`, default: `true`).
   - `lastLoginAt` (`Date`).
@@ -142,26 +149,84 @@ The system connects to **MongoDB Atlas** using **Mongoose ODM**. Connection is m
 #### 2. Vendor Model (`Vendor`)
 * **Collection**: `vendors`
 * **Schema**:
-  - `userId` (`ObjectId` ref `'User'`, required, unique, indexed): Links to the owner user account.
-  - `businessName` (`String`, required, trimmed).
+  - `userId` (`ObjectId` ref `'User'`, required, unique, indexed): Links to owner user account.
   - `ownerName` (`String`, required, trimmed).
-  - `city` (`String`, optional).
-  - `address` (`String`, optional).
-  - `cuisineTypes` (`[String]`, default: `[]`).
   - `status` (`String`, enum: `['PENDING', 'APPROVED', 'REJECTED']`, default: `'APPROVED'`, indexed).
+  - Virtual populate: `business` (links 1:1 to `Business`).
   - Timestamps (`createdAt`, `updatedAt`).
 
-#### 3. OTP Model (`Otp`)
+#### 3. Business Model (`Business`)
+* **Collection**: `businesses`
+* **Schema**:
+  - `vendorId` (`ObjectId` ref `'Vendor'`, required, unique, indexed): Enforces 1:1 Vendor-to-Business relationship.
+  - `businessName` (`String`, required, trimmed, indexed).
+  - `description` (`String`, optional).
+  - `cuisineTypes` (`[String]`, default `[]`, indexed).
+  - `address` (`String`, optional).
+  - `city` (`String`, optional, indexed).
+  - `state` (`String`, optional).
+  - `pincode` (`String`, optional).
+  - `location` (`Point` coordinates `[longitude, latitude]`, `2dsphere` index).
+  - `contactInformation` (`{ phone, email, website }`).
+  - `capacity` (`{ minGuests, maxGuests }`).
+  - `businessHours` (`[{ day, isOpen, openingTime, closingTime }]`).
+  - `status` (`String`, enum: `['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED']`, default: `'APPROVED'`, indexed).
+  - `averageRating` (`Number`, default `0`, min `0`, max `5`).
+  - `totalReviews` (`Number`, default `0`).
+  - `coverImage` (`String`, optional).
+  - `logo` (`String`, optional).
+  - Virtual populates: `vendor`, `menus`, `reviews`.
+  - Timestamps (`createdAt`, `updatedAt`).
+
+#### 4. Menu Model (`Menu`)
+* **Collection**: `menus`
+* **Schema**:
+  - `businessId` (`ObjectId` ref `'Business'`, required, indexed).
+  - `name` (`String`, required, trimmed).
+  - `description` (`String`, optional).
+  - `category` (`String`, optional).
+  - `isActive` (`Boolean`, default `true`).
+  - Virtual populate: `items` (links 1:N to `MenuItem`).
+  - Timestamps (`createdAt`, `updatedAt`).
+
+#### 5. MenuItem Model (`MenuItem`)
+* **Collection**: `menuitems`
+* **Schema**:
+  - `menuId` (`ObjectId` ref `'Menu'`, required, indexed).
+  - `businessId` (`ObjectId` ref `'Business'`, required, indexed).
+  - `name` (`String`, required, trimmed).
+  - `description` (`String`, optional).
+  - `category` (`String`, required, indexed).
+  - `price` (`Number`, required, min `0`).
+  - `image` (`String`, optional).
+  - `isVegetarian` (`Boolean`, default `true`).
+  - `isAvailable` (`Boolean`, default `true`).
+  - Timestamps (`createdAt`, `updatedAt`).
+
+#### 6. Review Model (`Review`)
+* **Collection**: `reviews`
+* **Schema**:
+  - `businessId` (`ObjectId` ref `'Business'`, required, indexed).
+  - `userId` (`ObjectId` ref `'User'`, required, indexed).
+  - `rating` (`Number`, required, min `1`, max `5`).
+  - `comment` (`String`, optional).
+  - `status` (`String`, enum: `['PUBLISHED', 'FLAGGED', 'HIDDEN']`, default: `'PUBLISHED'`, indexed).
+  - Compound Index: `{ businessId: 1, userId: 1 }`.
+  - Virtual populates: `user`, `business`.
+  - Timestamps (`createdAt`, `updatedAt`).
+
+#### 7. OTP Model (`Otp`)
 * **Collection**: `otps`
 * **Schema**:
   - `mobileNumber` (`String`, required, indexed).
   - `otp` (`String`, required).
   - `purpose` (`String`, enum: `['LOGIN', 'REGISTRATION', 'PASSWORD_RESET']`, default: `'LOGIN'`).
-  - `expiresAt` (`Date`, required, TTL index `expires: 0` for auto-deletion upon expiration).
+  - `expiresAt` (`Date`, required, TTL index `expires: 0`).
   - `isVerified` (`Boolean`, default: `false`).
   - Timestamps (`createdAt`, `updatedAt`).
 
 ---
+
 
 ### 1.6 Authentication & Authorization Strategy
 
@@ -908,7 +973,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-### 2.4 Vendor & Catering Module
+### 2.4 Vendor Module
 
 ---
 
@@ -916,9 +981,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 * **API Name**: Browse Approved Vendors (Guest / Public Flow)
 * **API Endpoint**: `/api/v1/vendors/public`
 * **HTTP Method**: `GET`
-* **Description**: Returns all caterers/vendors with `status: 'APPROVED'`. Supports guest browsing without requiring login. If a Bearer token is provided, context is attached via `optionalAuthenticate`.
+* **Description**: Returns all caterers/vendors with `status: 'APPROVED'` populated with their `business` profile. Supports guest browsing without requiring login.
 * **Authentication Required**: **Optional** (`optionalAuthenticate`)
-* **Required Role**: None (Guests permitted)
 
 ##### Response Example (`200 OK` - Guest Flow):
 ```json
@@ -929,17 +993,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "data": [
     {
       "id": "66f7d5b21b34c891e4a67891",
-      "businessName": "Royal Caterers & Event Planners",
       "ownerName": "Rajesh Sharma",
-      "city": "Ahmedabad",
-      "address": "102 SG Highway, Ahmedabad",
-      "cuisineTypes": ["North Indian", "Gujarati", "Chinese"],
       "status": "APPROVED",
-      "userId": {
-        "id": "66f7d5b11b34c891e4a67890",
-        "name": "Rajesh Sharma",
-        "mobileNumber": "9812345678",
-        "email": "info@royalcaters.com"
+      "business": {
+        "id": "6701a2c34b56d789e0f12345",
+        "businessName": "Royal Caterers & Event Planners",
+        "city": "Ahmedabad",
+        "cuisineTypes": ["North Indian", "Gujarati", "Chinese"]
       }
     }
   ],
@@ -956,28 +1016,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 * **API Name**: Get Vendor Profile Details
 * **API Endpoint**: `/api/v1/vendors/public/:id`
 * **HTTP Method**: `GET`
-* **Description**: Retrieves detailed profile of a vendor by Vendor ID.
+* **Description**: Retrieves detailed vendor identity profile along with populated `business` details.
 * **Authentication Required**: **Optional** (`optionalAuthenticate`)
-* **Path Parameters**:
-  - `id` (`string`, required): Vendor MongoDB ObjectId.
-
-##### Response Example (`200 OK`):
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Vendor profile retrieved",
-  "data": {
-    "id": "66f7d5b21b34c891e4a67891",
-    "businessName": "Royal Caterers & Event Planners",
-    "ownerName": "Rajesh Sharma",
-    "city": "Ahmedabad",
-    "address": "102 SG Highway, Ahmedabad",
-    "cuisineTypes": ["North Indian", "Gujarati", "Chinese"],
-    "status": "APPROVED"
-  }
-}
-```
 
 ---
 
@@ -985,55 +1025,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 * **API Name**: Request Event Catering Estimation / Quote
 * **API Endpoint**: `/api/v1/vendors/estimation-request`
 * **HTTP Method**: `POST`
-* **Description**: Allows an authenticated customer to request a catering price estimation from a vendor. Supports preserving context if initiated during anonymous guest browsing.
+* **Description**: Allows an authenticated customer to request a catering price estimation from a vendor.
 * **Authentication Required**: **Yes** (`Bearer <accessToken>`)
-* **Required Role**: Any authenticated user (`USER`, `VENDOR`, `SUPER_ADMIN`)
-
-##### Request Body:
-| Field | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| `vendorId` | `string` | **Yes** | Target vendor ID |
-| `guestCount` | `number` | **Yes** | Expected guest count for the event |
-| `eventDate` | `string` | **Yes** | Date of the planned event (`YYYY-MM-DD`) |
-| `preservedActionContext` | `object` | Optional | Custom state context preserved across guest login transition |
-
-```json
-{
-  "vendorId": "66f7d5b21b34c891e4a67891",
-  "guestCount": 250,
-  "eventDate": "2026-12-15",
-  "preservedActionContext": {
-    "selectedMenuPackage": "Royal Grand Buffet",
-    "draftNote": "Need live jalebi counter"
-  }
-}
-```
-
-##### Response Example (`200 OK`):
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Estimation request submitted successfully!",
-  "data": {
-    "requestId": "est_1728045600000",
-    "requestedBy": {
-      "id": "66f7d0a21b34c891e4a12345",
-      "mobileNumber": "9876543210",
-      "name": "Ankit Prajapati",
-      "role": "USER"
-    },
-    "vendorId": "66f7d5b21b34c891e4a67891",
-    "guestCount": 250,
-    "eventDate": "2026-12-15",
-    "contextPreserved": {
-      "selectedMenuPackage": "Royal Grand Buffet",
-      "draftNote": "Need live jalebi counter"
-    },
-    "status": "PENDING_VENDOR_REVIEW"
-  }
-}
-```
 
 ---
 
@@ -1045,44 +1038,265 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 * **Authentication Required**: **Yes** (`Bearer <accessToken>`)
 * **Required Role**: `VENDOR` or `SUPER_ADMIN`
 
+---
+
+### 2.5 Business Management Module
+
+---
+
+#### 21. Search & List Businesses
+* **API Name**: Search & Browse Businesses
+* **API Endpoint**: `/api/v1/businesses`
+* **HTTP Method**: `GET`
+* **Description**: Public endpoint to search and filter active business entities by `city`, `cuisine`, `search` keyword, `minCapacity`, `maxCapacity`, and `minRating` with pagination.
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+* **Query Parameters**:
+  - `city` (`string`, optional): Filter by city name.
+  - `cuisine` (`string`, optional): Filter by cuisine type.
+  - `search` (`string`, optional): Keyword search in name, city, address, or cuisine types.
+  - `minCapacity` (`number`, optional): Minimum guest capacity filter.
+  - `maxCapacity` (`number`, optional): Maximum guest capacity filter.
+  - `minRating` (`number`, optional): Minimum average rating (1-5).
+  - `page` (`number`, default `1`): Page number.
+  - `limit` (`number`, default `10`): Items per page.
+
 ##### Response Example (`200 OK`):
 ```json
 {
   "success": true,
   "statusCode": 200,
-  "message": "Vendor Dashboard access granted",
+  "message": "Businesses retrieved successfully",
   "data": {
-    "user": {
-      "id": "66f7d5b11b34c891e4a67890",
-      "name": "Rajesh Sharma",
-      "role": "VENDOR"
-    },
-    "vendor": {
-      "id": "66f7d5b21b34c891e4a67891",
-      "businessName": "Royal Caterers & Event Planners",
-      "status": "APPROVED"
-    },
-    "dashboardStats": {
-      "totalQuotations": 12,
-      "pendingEstimations": 4,
-      "confirmedBookings": 8,
-      "rating": 4.8
-    }
+    "businesses": [
+      {
+        "id": "6701a2c34b56d789e0f12345",
+        "vendorId": "66f7d5b21b34c891e4a67891",
+        "businessName": "Royal Caterers & Event Planners",
+        "cuisineTypes": ["North Indian", "Gujarati"],
+        "city": "Ahmedabad",
+        "capacity": { "minGuests": 50, "maxGuests": 2000 },
+        "averageRating": 4.8,
+        "totalReviews": 25,
+        "status": "APPROVED"
+      }
+    ],
+    "pagination": { "total": 1, "page": 1, "limit": 10, "totalPages": 1 }
   }
 }
 ```
 
 ---
 
-### 2.5 Super Admin Module
+#### 22. Get Current Vendor Business Profile
+* **API Name**: Get Authenticated Vendor's Business
+* **API Endpoint**: `/api/v1/businesses/my-business`
+* **HTTP Method**: `GET`
+* **Description**: Retrieves the 1:1 business profile registered for the currently logged-in vendor.
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
 
 ---
 
-#### 21. Get Super Admin System Overview
+#### 23. Get Business Details by ID
+* **API Name**: Get Business Details by ID
+* **API Endpoint**: `/api/v1/businesses/:id`
+* **HTTP Method**: `GET`
+* **Description**: Returns detailed business information including vendor info, business hours, capacities, and active menus with menu items.
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 24. Create Business Profile
+* **API Name**: Create Business Profile
+* **API Endpoint**: `/api/v1/businesses`
+* **HTTP Method**: `POST`
+* **Description**: Creates a new business profile linked to the vendor (`vendorId`). Enforces **1:1 rule** (a vendor can register only one business).
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+#### 25. Update Business Profile
+* **API Name**: Update Business Details
+* **API Endpoint**: `/api/v1/businesses/:id`
+* **HTTP Method**: `PUT`
+* **Description**: Allows the business owner vendor or super admin to update business profile details.
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+#### 26. Update Business Approval Status (Admin Action)
+* **API Name**: Moderate Business Approval Status
+* **API Endpoint**: `/api/v1/businesses/:id/status`
+* **HTTP Method**: `PATCH`
+* **Description**: Super Admin action to update business status (`APPROVED`, `REJECTED`, `SUSPENDED`).
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `SUPER_ADMIN`
+
+---
+
+### 2.6 Menu & MenuItem Module
+
+---
+
+#### 27. Create Menu
+* **API Name**: Create Business Menu
+* **API Endpoint**: `/api/v1/menus`
+* **HTTP Method**: `POST`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+#### 28. Get Menus for a Business
+* **API Name**: Get Business Menus with Items
+* **API Endpoint**: `/api/v1/menus/business/:businessId`
+* **HTTP Method**: `GET`
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 29. Get Menu by ID
+* **API Name**: Get Menu Details by ID
+* **API Endpoint**: `/api/v1/menus/:id`
+* **HTTP Method**: `GET`
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 30. Update Menu
+* **API Name**: Update Menu Details
+* **API Endpoint**: `/api/v1/menus/:id`
+* **HTTP Method**: `PUT`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+#### 31. Delete Menu
+* **API Name**: Delete Menu
+* **API Endpoint**: `/api/v1/menus/:id`
+* **HTTP Method**: `DELETE`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+#### 32. Create Menu Item
+* **API Name**: Create Menu Item
+* **API Endpoint**: `/api/v1/menu-items`
+* **HTTP Method**: `POST`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+#### 33. Get Menu Items by Menu ID
+* **API Name**: Get Items in Menu
+* **API Endpoint**: `/api/v1/menu-items/menu/:menuId`
+* **HTTP Method**: `GET`
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 34. Get Menu Items by Business ID
+* **API Name**: Get All Items for Business
+* **API Endpoint**: `/api/v1/menu-items/business/:businessId`
+* **HTTP Method**: `GET`
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 35. Get Menu Item by ID
+* **API Name**: Get Menu Item Details
+* **API Endpoint**: `/api/v1/menu-items/:id`
+* **HTTP Method**: `GET`
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 36. Update Menu Item
+* **API Name**: Update Menu Item
+* **API Endpoint**: `/api/v1/menu-items/:id`
+* **HTTP Method**: `PUT`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+#### 37. Delete Menu Item
+* **API Name**: Delete Menu Item
+* **API Endpoint**: `/api/v1/menu-items/:id`
+* **HTTP Method**: `DELETE`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `VENDOR` or `SUPER_ADMIN`
+
+---
+
+### 2.7 Review & Feedback Module
+
+---
+
+#### 38. Submit Business Review
+* **API Name**: Submit Review & Rating
+* **API Endpoint**: `/api/v1/reviews`
+* **HTTP Method**: `POST`
+* **Description**: Allows an authenticated user to submit a rating (1-5) and review for a business. Automatically recalculates `averageRating` and `totalReviews` on the target Business document.
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+
+---
+
+#### 39. Get Reviews for Business
+* **API Name**: Get Paginated Business Reviews
+* **API Endpoint**: `/api/v1/reviews/business/:businessId`
+* **HTTP Method**: `GET`
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 40. Get Review Details by ID
+* **API Name**: Get Review Details
+* **API Endpoint**: `/api/v1/reviews/:id`
+* **HTTP Method**: `GET`
+* **Authentication Required**: **Optional** (`optionalAuthenticate`)
+
+---
+
+#### 41. Update Review
+* **API Name**: Update Review & Rating
+* **API Endpoint**: `/api/v1/reviews/:id`
+* **HTTP Method**: `PUT`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+
+---
+
+#### 42. Delete Review
+* **API Name**: Delete Review
+* **API Endpoint**: `/api/v1/reviews/:id`
+* **HTTP Method**: `DELETE`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+
+---
+
+#### 43. Moderate Review Status (Admin Action)
+* **API Name**: Moderate Review Status
+* **API Endpoint**: `/api/v1/reviews/:id/status`
+* **HTTP Method**: `PATCH`
+* **Authentication Required**: **Yes** (`Bearer <accessToken>`)
+* **Required Role**: `SUPER_ADMIN`
+
+---
+
+### 2.8 Super Admin Module
+
+---
+
+#### 44. Get Super Admin System Overview
 * **API Name**: Get Super Admin System Metrics
 * **API Endpoint**: `/api/v1/admin/overview`
 * **HTTP Method**: `GET`
-* **Description**: Fetches overall system metrics, user counts, active vendor counts, and recent user signups.
+* **Description**: Fetches overall system metrics, user counts, active vendor counts, total business counts, and recent user signups.
 * **Authentication Required**: **Yes** (`Bearer <accessToken>`)
 * **Required Role**: `SUPER_ADMIN`
 
@@ -1100,6 +1314,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     },
     "totalUsers": 142,
     "totalVendors": 28,
+    "totalBusinesses": 28,
     "recentUsers": [
       {
         "id": "66f7d0a21b34c891e4a12345",
@@ -1113,15 +1328,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-##### Possible Error Responses:
-* `401 Unauthorized`: Missing authentication token.
-* `403 Forbidden`: Access denied if caller does not possess `SUPER_ADMIN` role.
-
 ---
 
 ## 3. Complete API Summary Matrix
 
-The following table summarizes **100% of all 21 implemented APIs** across `prasang-server`:
+The following table summarizes **100% of all 44 implemented APIs** across `prasang-server`:
 
 | # | API Name | Method | Endpoint URL | Authentication | Required Role |
 | :-: | :--- | :-: | :--- | :-: | :--- |
@@ -1145,8 +1356,32 @@ The following table summarizes **100% of all 21 implemented APIs** across `prasa
 | **18** | Get Vendor Profile Details | `GET` | `/api/v1/vendors/public/:id` | Optional | None (Guests allowed) |
 | **19** | Request Event Catering Estimation | `POST` | `/api/v1/vendors/estimation-request` | **Yes** | Any Authenticated Role |
 | **20** | Get Vendor Dashboard & Metrics | `GET` | `/api/v1/vendors/dashboard` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
-| **21** | Get Super Admin System Metrics | `GET` | `/api/v1/admin/overview` | **Yes** | `SUPER_ADMIN` |
+| **21** | Search & Browse Businesses | `GET` | `/api/v1/businesses` | Optional | None (Guests allowed) |
+| **22** | Get Authenticated Vendor's Business | `GET` | `/api/v1/businesses/my-business` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **23** | Get Business Details by ID | `GET` | `/api/v1/businesses/:id` | Optional | None (Guests allowed) |
+| **24** | Create Business Profile | `POST` | `/api/v1/businesses` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **25** | Update Business Details | `PUT` | `/api/v1/businesses/:id` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **26** | Moderate Business Approval Status | `PATCH` | `/api/v1/businesses/:id/status` | **Yes** | `SUPER_ADMIN` |
+| **27** | Create Business Menu | `POST` | `/api/v1/menus` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **28** | Get Business Menus with Items | `GET` | `/api/v1/menus/business/:businessId` | Optional | None (Guests allowed) |
+| **29** | Get Menu Details by ID | `GET` | `/api/v1/menus/:id` | Optional | None (Guests allowed) |
+| **30** | Update Menu Details | `PUT` | `/api/v1/menus/:id` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **31** | Delete Menu | `DELETE` | `/api/v1/menus/:id` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **32** | Create Menu Item | `POST` | `/api/v1/menu-items` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **33** | Get Items in Menu | `GET` | `/api/v1/menu-items/menu/:menuId` | Optional | None (Guests allowed) |
+| **34** | Get All Items for Business | `GET` | `/api/v1/menu-items/business/:businessId` | Optional | None (Guests allowed) |
+| **35** | Get Menu Item Details | `GET` | `/api/v1/menu-items/:id` | Optional | None (Guests allowed) |
+| **36** | Update Menu Item | `PUT` | `/api/v1/menu-items/:id` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **37** | Delete Menu Item | `DELETE` | `/api/v1/menu-items/:id` | **Yes** | `VENDOR`, `SUPER_ADMIN` |
+| **38** | Submit Review & Rating | `POST` | `/api/v1/reviews` | **Yes** | Any Authenticated Role |
+| **39** | Get Paginated Business Reviews | `GET` | `/api/v1/reviews/business/:businessId` | Optional | None (Guests allowed) |
+| **40** | Get Review Details | `GET` | `/api/v1/reviews/:id` | Optional | None (Guests allowed) |
+| **41** | Update Review & Rating | `PUT` | `/api/v1/reviews/:id` | **Yes** | Any Authenticated Role |
+| **42** | Delete Review | `DELETE` | `/api/v1/reviews/:id` | **Yes** | Any Authenticated Role |
+| **43** | Moderate Review Status | `PATCH` | `/api/v1/reviews/:id/status` | **Yes** | `SUPER_ADMIN` |
+| **44** | Get Super Admin System Metrics | `GET` | `/api/v1/admin/overview` | **Yes** | `SUPER_ADMIN` |
 
 ---
 
 *Documentation compiled and verified against codebase implementation.*
+

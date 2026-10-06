@@ -1,5 +1,6 @@
 import { UserResponseDTO } from '../user/user.interface.js';
 import { IVendorDocument } from '../vendor/vendor.interface.js';
+import { IBusinessDocument } from '../business/business.interface.js';
 import { OtpPurpose } from './otp.interface.js';
 
 export interface RegisterUserDTO {
@@ -57,5 +58,7 @@ export interface AuthTokens {
 export interface AuthResult {
   user: UserResponseDTO;
   vendor?: IVendorDocument;
+  business?: IBusinessDocument;
   tokens: AuthTokens;
 }
+

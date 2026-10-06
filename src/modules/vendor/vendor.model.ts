@@ -10,27 +10,10 @@ const vendorSchema = new Schema<IVendorDocument>(
       unique: true,
       index: true,
     },
-    businessName: {
-      type: String,
-      required: [true, 'Business name is required'],
-      trim: true,
-    },
     ownerName: {
       type: String,
       required: [true, 'Owner name is required'],
       trim: true,
-    },
-    city: {
-      type: String,
-      trim: true,
-    },
-    address: {
-      type: String,
-      trim: true,
-    },
-    cuisineTypes: {
-      type: [String],
-      default: [],
     },
     status: {
       type: String,
@@ -41,7 +24,9 @@ const vendorSchema = new Schema<IVendorDocument>(
   },
   {
     timestamps: true,
+    toObject: { virtuals: true },
     toJSON: {
+      virtuals: true,
       transform(_doc, ret) {
         const retObj = ret as Record<string, unknown>;
         retObj.id = retObj._id;
@@ -53,4 +38,12 @@ const vendorSchema = new Schema<IVendorDocument>(
   },
 );
 
+vendorSchema.virtual('business', {
+  ref: 'Business',
+  localField: '_id',
+  foreignField: 'vendorId',
+  justOne: true,
+});
+
 export const VendorModel = model<IVendorDocument>('Vendor', vendorSchema);
+

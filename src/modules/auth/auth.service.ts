@@ -3,6 +3,7 @@ import { OtpProviderFactory } from './providers/otp.provider.js';
 import { verifyRefreshToken, generateAuthTokens } from './auth.tokens.js';
 import { userService } from '../user/user.service.js';
 import { vendorService } from '../vendor/vendor.service.js';
+import { businessService } from '../business/business.service.js';
 import { ApiError } from '../../utils/api-error.js';
 import { StatusCodes } from '../../constants/index.js';
 import {
@@ -75,8 +76,12 @@ export class AuthService {
   public async getCurrentUser(userId: string) {
     const user = await userService.getUserById(userId);
     let vendor;
+    let business;
     if (user.role === 'VENDOR') {
       vendor = await vendorService.getVendorByUserId(user._id.toString());
+      if (vendor) {
+        business = await businessService.getBusinessByVendorId(vendor._id.toString());
+      }
     }
 
     return {
@@ -91,8 +96,10 @@ export class AuthService {
         updatedAt: user.updatedAt,
       },
       ...(vendor ? { vendor } : {}),
+      ...(business ? { business } : {}),
     };
   }
 }
 
 export const authService = new AuthService();
+

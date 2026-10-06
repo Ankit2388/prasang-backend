@@ -4,7 +4,9 @@ import { StatusCodes } from '../../../constants/index.js';
 import { USER_ROLES } from '../../../constants/roles.js';
 import { userService } from '../../user/user.service.js';
 import { vendorService } from '../../vendor/vendor.service.js';
+import { businessService } from '../../business/business.service.js';
 import { IVendorDocument } from '../../vendor/vendor.interface.js';
+import { IBusinessDocument } from '../../business/business.interface.js';
 import { OtpProviderFactory } from '../providers/otp.provider.js';
 import {
   RegisterUserDTO,
@@ -40,12 +42,14 @@ const mapUserToDTO = (user: IUserDocument): UserResponseDTO => ({
 const generateResult = async (
   user: IUserDocument,
   vendorProfile?: IVendorDocument,
+  businessProfile?: IBusinessDocument,
 ): Promise<AuthResult> => {
   await userService.updateLastLogin(user._id.toString());
   const tokens: AuthTokens = generateAuthTokens(user);
   return {
     user: mapUserToDTO(user),
     ...(vendorProfile ? { vendor: vendorProfile } : {}),
+    ...(businessProfile ? { business: businessProfile } : {}),
     tokens,
   };
 };
@@ -116,14 +120,19 @@ export class PasswordAuthStrategy implements IAuthStrategy {
 
     const vendor = await vendorService.createVendorProfile({
       userId: user._id.toString(),
-      businessName: data.businessName,
       ownerName: data.ownerName || data.name,
-      city: data.city,
-      address: data.address,
-      cuisineTypes: data.cuisineTypes,
     });
 
-    return generateResult(user, vendor);
+    const business = await businessService.createBusiness({
+      vendorId: vendor._id.toString(),
+      businessName: data.businessName,
+      city: data.city,
+      address: data.address,
+      cuisineTypes: data.cuisineTypes || [],
+      status: 'APPROVED',
+    });
+
+    return generateResult(user, vendor, business);
   }
 
   public async loginVendor(data: LoginVendorDTO): Promise<AuthResult> {
@@ -153,7 +162,11 @@ export class PasswordAuthStrategy implements IAuthStrategy {
     }
 
     const vendor = await vendorService.getVendorByUserId(user._id.toString());
-    return generateResult(user, vendor || undefined);
+    const business = vendor
+      ? await businessService.getBusinessByVendorId(vendor._id.toString())
+      : null;
+
+    return generateResult(user, vendor || undefined, business || undefined);
   }
 
   public async loginAdmin(data: LoginAdminDTO): Promise<AuthResult> {
@@ -232,14 +245,19 @@ export class OtpAuthStrategy implements IAuthStrategy {
 
     const vendor = await vendorService.createVendorProfile({
       userId: user._id.toString(),
-      businessName: data.businessName,
       ownerName: data.ownerName || data.name,
-      city: data.city,
-      address: data.address,
-      cuisineTypes: data.cuisineTypes,
     });
 
-    return generateResult(user, vendor);
+    const business = await businessService.createBusiness({
+      vendorId: vendor._id.toString(),
+      businessName: data.businessName,
+      city: data.city,
+      address: data.address,
+      cuisineTypes: data.cuisineTypes || [],
+      status: 'APPROVED',
+    });
+
+    return generateResult(user, vendor, business);
   }
 
   public async loginVendor(data: LoginVendorDTO): Promise<AuthResult> {
@@ -271,7 +289,11 @@ export class OtpAuthStrategy implements IAuthStrategy {
     }
 
     const vendor = await vendorService.getVendorByUserId(user._id.toString());
-    return generateResult(user, vendor || undefined);
+    const business = vendor
+      ? await businessService.getBusinessByVendorId(vendor._id.toString())
+      : null;
+
+    return generateResult(user, vendor || undefined, business || undefined);
   }
 
   public async loginAdmin(data: LoginAdminDTO): Promise<AuthResult> {
@@ -304,3 +326,4 @@ export class AuthStrategyResolver {
     return this.passwordStrategy;
   }
 }
+

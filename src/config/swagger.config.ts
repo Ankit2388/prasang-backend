@@ -51,13 +51,30 @@ const swaggerDefinition = {
     },
     {
       name: 'Vendors',
-      description: 'Public caterer discovery, guest browsing, estimation requests, and vendor portal metrics',
+      description: 'Vendor account identity, estimation requests, and vendor portal dashboard',
+    },
+    {
+      name: 'Businesses',
+      description: 'Business operating profile, catalog search, guest capacity filtering, and approval moderation',
+    },
+    {
+      name: 'Menus',
+      description: 'Business menu groupings and catalog menu configuration',
+    },
+    {
+      name: 'MenuItems',
+      description: 'Individual dish / menu item management and availability toggling',
+    },
+    {
+      name: 'Reviews',
+      description: 'Customer ratings, feedback, and content moderation',
     },
     {
       name: 'Admin',
       description: 'Super Admin platform metrics, user analytics, and system monitoring',
     },
   ],
+
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -145,24 +162,143 @@ const swaggerDefinition = {
               { $ref: '#/components/schemas/User' },
             ],
           },
-          businessName: { type: 'string', example: 'Royal Caterers & Event Planners' },
           ownerName: { type: 'string', example: 'Rajesh Sharma' },
-          city: { type: 'string', nullable: true, example: 'Ahmedabad' },
-          address: { type: 'string', nullable: true, example: '102 SG Highway, Ahmedabad' },
-          cuisineTypes: {
-            type: 'array',
-            items: { type: 'string' },
-            example: ['North Indian', 'Gujarati', 'Chinese', 'Desserts'],
-          },
           status: {
             type: 'string',
             enum: ['PENDING', 'APPROVED', 'REJECTED'],
             example: 'APPROVED',
           },
+          business: {
+            $ref: '#/components/schemas/Business',
+          },
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
         },
       },
+      Business: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '6701a2c34b56d789e0f12345' },
+          vendorId: { type: 'string', example: '66f7d5b21b34c891e4a67891' },
+          businessName: { type: 'string', example: 'Royal Caterers & Event Planners' },
+          description: { type: 'string', example: 'Premium catering services for weddings and corporate events.' },
+          cuisineTypes: {
+            type: 'array',
+            items: { type: 'string' },
+            example: ['North Indian', 'Gujarati', 'Chinese', 'Desserts'],
+          },
+          address: { type: 'string', example: '102 SG Highway, Bodakdev' },
+          city: { type: 'string', example: 'Ahmedabad' },
+          state: { type: 'string', example: 'Gujarat' },
+          pincode: { type: 'string', example: '380054' },
+          location: {
+            type: 'object',
+            properties: {
+              type: { type: 'string', example: 'Point' },
+              coordinates: {
+                type: 'array',
+                items: { type: 'number' },
+                example: [72.5714, 23.0225],
+              },
+            },
+          },
+          contactInformation: {
+            type: 'object',
+            properties: {
+              phone: { type: 'string', example: '9876543210' },
+              email: { type: 'string', example: 'info@royalcaterers.com' },
+              website: { type: 'string', example: 'https://royalcaterers.com' },
+            },
+          },
+          capacity: {
+            type: 'object',
+            properties: {
+              minGuests: { type: 'number', example: 50 },
+              maxGuests: { type: 'number', example: 2000 },
+            },
+          },
+          businessHours: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                day: { type: 'string', example: 'MONDAY' },
+                isOpen: { type: 'boolean', example: true },
+                openingTime: { type: 'string', example: '09:00' },
+                closingTime: { type: 'string', example: '22:00' },
+              },
+            },
+          },
+          status: {
+            type: 'string',
+            enum: ['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'],
+            example: 'APPROVED',
+          },
+          averageRating: { type: 'number', example: 4.8 },
+          totalReviews: { type: 'number', example: 25 },
+          coverImage: { type: 'string', example: 'https://example.com/cover.jpg' },
+          logo: { type: 'string', example: 'https://example.com/logo.jpg' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      Menu: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '6701b3d45c67e890f1a23456' },
+          businessId: { type: 'string', example: '6701a2c34b56d789e0f12345' },
+          name: { type: 'string', example: 'Royal Wedding Dinner Buffet' },
+          description: { type: 'string', example: 'Complete multi-course royal banquet menu' },
+          category: { type: 'string', example: 'Wedding Packages' },
+          isActive: { type: 'boolean', example: true },
+          items: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/MenuItem' },
+          },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      MenuItem: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '6701c4e56d78f901a2b34567' },
+          menuId: { type: 'string', example: '6701b3d45c67e890f1a23456' },
+          businessId: { type: 'string', example: '6701a2c34b56d789e0f12345' },
+          name: { type: 'string', example: 'Paneer Butter Masala' },
+          description: { type: 'string', example: 'Cottage cheese cubes in rich tomato gravy' },
+          category: { type: 'string', example: 'Main Course' },
+          price: { type: 'number', example: 350 },
+          image: { type: 'string', example: 'https://example.com/paneer.jpg' },
+          isVegetarian: { type: 'boolean', example: true },
+          isAvailable: { type: 'boolean', example: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      Review: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '6701d5f67e89a012b3c45678' },
+          businessId: { type: 'string', example: '6701a2c34b56d789e0f12345' },
+          userId: {
+            oneOf: [
+              { type: 'string', example: '66f7d0a21b34c891e4a12345' },
+              { $ref: '#/components/schemas/User' },
+            ],
+          },
+          rating: { type: 'number', example: 5 },
+          comment: { type: 'string', example: 'Excellent food quality and prompt service for 500 guests!' },
+          status: {
+            type: 'string',
+            enum: ['PUBLISHED', 'FLAGGED', 'HIDDEN'],
+            example: 'PUBLISHED',
+          },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+
       AuthTokens: {
         type: 'object',
         properties: {
@@ -433,6 +569,145 @@ const swaggerDefinition = {
           },
         },
       },
+
+      CreateBusinessRequest: {
+        type: 'object',
+        required: ['businessName'],
+        properties: {
+          vendorId: { type: 'string', example: '66f7d5b21b34c891e4a67891' },
+          businessName: { type: 'string', example: 'Royal Caterers & Event Planners' },
+          description: { type: 'string', example: 'Premium catering services for weddings and corporate events.' },
+          cuisineTypes: { type: 'array', items: { type: 'string' }, example: ['North Indian', 'Gujarati', 'Chinese'] },
+          address: { type: 'string', example: '102 SG Highway, Bodakdev' },
+          city: { type: 'string', example: 'Ahmedabad' },
+          state: { type: 'string', example: 'Gujarat' },
+          pincode: { type: 'string', example: '380054' },
+          contactInformation: {
+            type: 'object',
+            properties: {
+              phone: { type: 'string', example: '9876543210' },
+              email: { type: 'string', example: 'info@royalcaterers.com' },
+              website: { type: 'string', example: 'https://royalcaterers.com' },
+            },
+          },
+          capacity: {
+            type: 'object',
+            properties: {
+              minGuests: { type: 'number', example: 50 },
+              maxGuests: { type: 'number', example: 2000 },
+            },
+          },
+          coverImage: { type: 'string', example: 'https://example.com/cover.jpg' },
+          logo: { type: 'string', example: 'https://example.com/logo.jpg' },
+        },
+      },
+      UpdateBusinessRequest: {
+        type: 'object',
+        properties: {
+          businessName: { type: 'string', example: 'Royal Caterers & Fine Dining' },
+          description: { type: 'string', example: 'Updated business description.' },
+          cuisineTypes: { type: 'array', items: { type: 'string' }, example: ['North Indian', 'Gujarati', 'Mexican'] },
+          address: { type: 'string', example: '204 SG Highway, Bodakdev' },
+          city: { type: 'string', example: 'Ahmedabad' },
+          state: { type: 'string', example: 'Gujarat' },
+          pincode: { type: 'string', example: '380054' },
+          capacity: {
+            type: 'object',
+            properties: {
+              minGuests: { type: 'number', example: 100 },
+              maxGuests: { type: 'number', example: 2500 },
+            },
+          },
+          coverImage: { type: 'string', example: 'https://example.com/cover.jpg' },
+          logo: { type: 'string', example: 'https://example.com/logo.jpg' },
+        },
+      },
+      UpdateBusinessStatusRequest: {
+        type: 'object',
+        required: ['status'],
+        properties: {
+          status: {
+            type: 'string',
+            enum: ['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'],
+            example: 'APPROVED',
+          },
+        },
+      },
+      CreateMenuRequest: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          businessId: { type: 'string', example: '6701a2c34b56d789e0f12345' },
+          name: { type: 'string', example: 'Royal Wedding Dinner Buffet' },
+          description: { type: 'string', example: 'Complete multi-course royal banquet menu' },
+          category: { type: 'string', example: 'Wedding Packages' },
+          isActive: { type: 'boolean', example: true },
+        },
+      },
+      UpdateMenuRequest: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', example: 'Updated Wedding Buffet' },
+          description: { type: 'string', example: 'Updated menu description' },
+          category: { type: 'string', example: 'Premium Packages' },
+          isActive: { type: 'boolean', example: true },
+        },
+      },
+      CreateMenuItemRequest: {
+        type: 'object',
+        required: ['menuId', 'name', 'category', 'price'],
+        properties: {
+          menuId: { type: 'string', example: '6701b3d45c67e890f1a23456' },
+          businessId: { type: 'string', example: '6701a2c34b56d789e0f12345' },
+          name: { type: 'string', example: 'Paneer Butter Masala' },
+          description: { type: 'string', example: 'Cottage cheese cubes in rich tomato gravy' },
+          category: { type: 'string', example: 'Main Course' },
+          price: { type: 'number', example: 350 },
+          image: { type: 'string', example: 'https://example.com/paneer.jpg' },
+          isVegetarian: { type: 'boolean', example: true },
+          isAvailable: { type: 'boolean', example: true },
+        },
+      },
+      UpdateMenuItemRequest: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', example: 'Paneer Tikka Masala' },
+          description: { type: 'string', example: 'Updated description' },
+          category: { type: 'string', example: 'Main Course' },
+          price: { type: 'number', example: 380 },
+          image: { type: 'string', example: 'https://example.com/paneer.jpg' },
+          isVegetarian: { type: 'boolean', example: true },
+          isAvailable: { type: 'boolean', example: true },
+        },
+      },
+      CreateReviewRequest: {
+        type: 'object',
+        required: ['businessId', 'rating'],
+        properties: {
+          businessId: { type: 'string', example: '6701a2c34b56d789e0f12345' },
+          rating: { type: 'number', minimum: 1, maximum: 5, example: 5 },
+          comment: { type: 'string', example: 'Excellent food quality and prompt service for 500 guests!' },
+        },
+      },
+      UpdateReviewRequest: {
+        type: 'object',
+        properties: {
+          rating: { type: 'number', minimum: 1, maximum: 5, example: 4 },
+          comment: { type: 'string', example: 'Updated review comment.' },
+        },
+      },
+      UpdateReviewStatusRequest: {
+        type: 'object',
+        required: ['status'],
+        properties: {
+          status: {
+            type: 'string',
+            enum: ['PUBLISHED', 'FLAGGED', 'HIDDEN'],
+            example: 'FLAGGED',
+          },
+        },
+      },
+
     },
   },
   paths: {
@@ -1458,8 +1733,321 @@ const swaggerDefinition = {
     },
 
     // ------------------------------------------------------------------------
+    // BUSINESS MODULE
+    // ------------------------------------------------------------------------
+    '/api/v1/businesses': {
+      get: {
+        tags: ['Businesses'],
+        summary: 'Search & List Businesses',
+        description: 'Public endpoint to browse and search businesses with filtering (city, cuisine, capacity, min rating) and pagination.',
+        parameters: [
+          { name: 'city', in: 'query', schema: { type: 'string' }, description: 'Filter by city (case-insensitive)' },
+          { name: 'cuisine', in: 'query', schema: { type: 'string' }, description: 'Filter by cuisine type' },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'General keyword search' },
+          { name: 'minCapacity', in: 'query', schema: { type: 'integer' }, description: 'Minimum guest capacity' },
+          { name: 'maxCapacity', in: 'query', schema: { type: 'integer' }, description: 'Maximum guest capacity' },
+          { name: 'minRating', in: 'query', schema: { type: 'number' }, description: 'Minimum average rating (1-5)' },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+        ],
+        responses: {
+          '200': {
+            description: 'Businesses list retrieved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    statusCode: { type: 'integer', example: 200 },
+                    message: { type: 'string', example: 'Businesses retrieved successfully' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        businesses: { type: 'array', items: { $ref: '#/components/schemas/Business' } },
+                        pagination: {
+                          type: 'object',
+                          properties: {
+                            total: { type: 'integer', example: 1 },
+                            page: { type: 'integer', example: 1 },
+                            limit: { type: 'integer', example: 10 },
+                            totalPages: { type: 'integer', example: 1 },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ['Businesses'],
+        summary: 'Create Business Profile',
+        description: 'Vendor creates a business profile. (Enforces 1:1 vendor-to-business rule).\n\nAuthentication: Required (Bearer token)\nRequired Role: "VENDOR" or "SUPER_ADMIN"',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateBusinessRequest' } } },
+        },
+        responses: {
+          '201': {
+            description: 'Business profile created successfully',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiResponseSuccess' } } },
+          },
+          '409': { description: 'Conflict (Vendor already has a business profile)' },
+        },
+      },
+    },
+    '/api/v1/businesses/my-business': {
+      get: {
+        tags: ['Businesses'],
+        summary: 'Get Authenticated Vendor Business',
+        description: 'Retrieves the business profile associated with the logged-in vendor.\n\nAuthentication: Required (Bearer token)\nRequired Role: "VENDOR" or "SUPER_ADMIN"',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Vendor business details retrieved',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiResponseSuccess' } } },
+          },
+          '404': { description: 'Not Found (No business registered for vendor)' },
+        },
+      },
+    },
+    '/api/v1/businesses/{id}': {
+      get: {
+        tags: ['Businesses'],
+        summary: 'Get Business Details by ID',
+        description: 'Public endpoint to view full details of a business including active menus and menu items.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Business detail retrieved',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiResponseSuccess' } } },
+          },
+          '404': { description: 'Business not found' },
+        },
+      },
+      put: {
+        tags: ['Businesses'],
+        summary: 'Update Business Details',
+        description: 'Vendor updates their business profile.\n\nAuthentication: Required (Bearer token)\nRequired Role: "VENDOR" or "SUPER_ADMIN"',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateBusinessRequest' } } },
+        },
+        responses: {
+          '200': { description: 'Business updated successfully' },
+          '403': { description: 'Forbidden (Not owner of business)' },
+        },
+      },
+    },
+    '/api/v1/businesses/{id}/status': {
+      patch: {
+        tags: ['Businesses'],
+        summary: 'Update Business Approval Status',
+        description: 'Super Admin updates business status (APPROVED, REJECTED, SUSPENDED).\n\nAuthentication: Required (Bearer token)\nRequired Role: "SUPER_ADMIN"',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateBusinessStatusRequest' } } },
+        },
+        responses: {
+          '200': { description: 'Business status updated' },
+          '403': { description: 'Forbidden' },
+        },
+      },
+    },
+
+    // ------------------------------------------------------------------------
+    // MENU & MENUITEM MODULE
+    // ------------------------------------------------------------------------
+    '/api/v1/menus': {
+      post: {
+        tags: ['Menus'],
+        summary: 'Create Menu',
+        description: 'Vendor creates a new menu category/group under their business.\n\nAuthentication: Required (Bearer token)\nRequired Role: "VENDOR" or "SUPER_ADMIN"',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateMenuRequest' } } },
+        },
+        responses: {
+          '201': { description: 'Menu created successfully' },
+        },
+      },
+    },
+    '/api/v1/menus/business/{businessId}': {
+      get: {
+        tags: ['Menus'],
+        summary: 'Get Menus for a Business',
+        description: 'Public endpoint to retrieve all active menus for a business with populated menu items.',
+        parameters: [{ name: 'businessId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Menus retrieved' },
+        },
+      },
+    },
+    '/api/v1/menus/{id}': {
+      get: {
+        tags: ['Menus'],
+        summary: 'Get Menu by ID',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Menu details retrieved' } },
+      },
+      put: {
+        tags: ['Menus'],
+        summary: 'Update Menu',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateMenuRequest' } } },
+        },
+        responses: { '200': { description: 'Menu updated' } },
+      },
+      delete: {
+        tags: ['Menus'],
+        summary: 'Delete Menu',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Menu deleted' } },
+      },
+    },
+    '/api/v1/menu-items': {
+      post: {
+        tags: ['MenuItems'],
+        summary: 'Create Menu Item',
+        description: 'Vendor creates a menu item linked to a menu and business.\n\nAuthentication: Required (Bearer token)\nRequired Role: "VENDOR" or "SUPER_ADMIN"',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateMenuItemRequest' } } },
+        },
+        responses: { '201': { description: 'Menu item created' } },
+      },
+    },
+    '/api/v1/menu-items/menu/{menuId}': {
+      get: {
+        tags: ['MenuItems'],
+        summary: 'Get Items by Menu ID',
+        parameters: [{ name: 'menuId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Menu items retrieved' } },
+      },
+    },
+    '/api/v1/menu-items/business/{businessId}': {
+      get: {
+        tags: ['MenuItems'],
+        summary: 'Get Items by Business ID',
+        parameters: [{ name: 'businessId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Business menu items retrieved' } },
+      },
+    },
+    '/api/v1/menu-items/{id}': {
+      get: {
+        tags: ['MenuItems'],
+        summary: 'Get Menu Item by ID',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Menu item details retrieved' } },
+      },
+      put: {
+        tags: ['MenuItems'],
+        summary: 'Update Menu Item',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateMenuItemRequest' } } },
+        },
+        responses: { '200': { description: 'Menu item updated' } },
+      },
+      delete: {
+        tags: ['MenuItems'],
+        summary: 'Delete Menu Item',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Menu item deleted' } },
+      },
+    },
+
+    // ------------------------------------------------------------------------
+    // REVIEW / FEEDBACK MODULE
+    // ------------------------------------------------------------------------
+    '/api/v1/reviews': {
+      post: {
+        tags: ['Reviews'],
+        summary: 'Submit Review for Business',
+        description: 'Customer submits rating and review for a business. Triggers rating auto-recalculation.\n\nAuthentication: Required (Bearer token)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/CreateReviewRequest' } } },
+        },
+        responses: { '201': { description: 'Review submitted successfully' } },
+      },
+    },
+    '/api/v1/reviews/business/{businessId}': {
+      get: {
+        tags: ['Reviews'],
+        summary: 'Get Paginated Reviews for Business',
+        parameters: [
+          { name: 'businessId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+        ],
+        responses: { '200': { description: 'Reviews list retrieved' } },
+      },
+    },
+    '/api/v1/reviews/{id}': {
+      get: {
+        tags: ['Reviews'],
+        summary: 'Get Review by ID',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Review details retrieved' } },
+      },
+      put: {
+        tags: ['Reviews'],
+        summary: 'Update Review',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateReviewRequest' } } },
+        },
+        responses: { '200': { description: 'Review updated' } },
+      },
+      delete: {
+        tags: ['Reviews'],
+        summary: 'Delete Review',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Review deleted' } },
+      },
+    },
+    '/api/v1/reviews/{id}/status': {
+      patch: {
+        tags: ['Reviews'],
+        summary: 'Moderate Review Status',
+        description: 'Super Admin updates review status (PUBLISHED, FLAGGED, HIDDEN).\n\nAuthentication: Required (Bearer token)\nRequired Role: "SUPER_ADMIN"',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateReviewStatusRequest' } } },
+        },
+        responses: { '200': { description: 'Review status moderated' } },
+      },
+    },
+
+    // ------------------------------------------------------------------------
     // SUPER ADMIN MODULE
     // ------------------------------------------------------------------------
+
     '/api/v1/admin/overview': {
       get: {
         tags: ['Admin'],
