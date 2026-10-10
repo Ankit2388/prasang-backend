@@ -12,7 +12,7 @@ const vendorSchema = new Schema<IVendorDocument>(
     },
     ownerName: {
       type: String,
-      required: [true, 'Owner name is required'],
+      required: false,
       trim: true,
     },
     status: {

@@ -38,11 +38,6 @@ const registerVendorSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters long'),
     password: z.string().min(6, 'Password must be at least 6 characters long').optional(),
     email: z.string().email('Invalid email address format').optional(),
-    businessName: z.string().min(2, 'Business name must be at least 2 characters long'),
-    ownerName: z.string().optional(),
-    city: z.string().optional(),
-    address: z.string().optional(),
-    cuisineTypes: z.array(z.string()).optional(),
   }),
 });
 

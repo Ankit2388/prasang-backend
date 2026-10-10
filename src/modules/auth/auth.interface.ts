@@ -21,11 +21,6 @@ export interface RegisterVendorDTO {
   name: string;
   password?: string;
   email?: string;
-  businessName: string;
-  ownerName?: string;
-  city?: string;
-  address?: string;
-  cuisineTypes?: string[];
 }
 
 export interface LoginVendorDTO {

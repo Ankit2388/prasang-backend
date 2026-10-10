@@ -29,7 +29,7 @@ export class VendorService {
 
   public async createVendorProfile(data: {
     userId: string;
-    ownerName: string;
+    ownerName?: string;
     status?: 'PENDING' | 'APPROVED' | 'REJECTED';
   }): Promise<IVendorDocument> {
     const existing = await VendorModel.findOne({ userId: data.userId });
@@ -42,7 +42,7 @@ export class VendorService {
 
     const vendor = new VendorModel({
       userId: data.userId,
-      ownerName: data.ownerName,
+      ...(data.ownerName ? { ownerName: data.ownerName } : {}),
       status: data.status || 'APPROVED',
     });
 

@@ -120,19 +120,10 @@ export class PasswordAuthStrategy implements IAuthStrategy {
 
     const vendor = await vendorService.createVendorProfile({
       userId: user._id.toString(),
-      ownerName: data.ownerName || data.name,
+      ownerName: data.name,
     });
 
-    const business = await businessService.createBusiness({
-      vendorId: vendor._id.toString(),
-      businessName: data.businessName,
-      city: data.city,
-      address: data.address,
-      cuisineTypes: data.cuisineTypes || [],
-      status: 'APPROVED',
-    });
-
-    return generateResult(user, vendor, business);
+    return generateResult(user, vendor);
   }
 
   public async loginVendor(data: LoginVendorDTO): Promise<AuthResult> {
@@ -245,19 +236,10 @@ export class OtpAuthStrategy implements IAuthStrategy {
 
     const vendor = await vendorService.createVendorProfile({
       userId: user._id.toString(),
-      ownerName: data.ownerName || data.name,
+      ownerName: data.name,
     });
 
-    const business = await businessService.createBusiness({
-      vendorId: vendor._id.toString(),
-      businessName: data.businessName,
-      city: data.city,
-      address: data.address,
-      cuisineTypes: data.cuisineTypes || [],
-      status: 'APPROVED',
-    });
-
-    return generateResult(user, vendor, business);
+    return generateResult(user, vendor);
   }
 
   public async loginVendor(data: LoginVendorDTO): Promise<AuthResult> {

@@ -530,10 +530,10 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
 ---
 
 #### 6. Register Vendor Account & Profile
-* **API Name**: Register Vendor User Account & Business Profile
+* **API Name**: Register Vendor User Account & Profile
 * **API Endpoint**: `/api/v1/auth/register/vendor`
 * **HTTP Method**: `POST`
-* **Description**: Creates a user account with `VENDOR` role and simultaneously creates an associated `Vendor` profile.
+* **Description**: Creates a user account with `VENDOR` role and an associated `Vendor` profile.
 * **Authentication Required**: No
 * **Required Role**: None
 
@@ -542,24 +542,15 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
 | :--- | :--- | :--- | :--- | :--- |
 | `mobileNumber` | `string` | **Yes** | Indian 10-digit format | Vendor mobile number |
 | `name` | `string` | **Yes** | Min length: 2 | Account owner name |
-| `businessName` | `string` | **Yes** | Min length: 2 | Catering/Vendor business name |
 | `password` | `string` | Optional | Min length: 6 | Account password |
 | `email` | `string` | Optional | Email format | Business email address |
-| `ownerName` | `string` | Optional | Min length: 2 | Owner contact name (Defaults to `name`) |
-| `city` | `string` | Optional | — | Operating city |
-| `address` | `string` | Optional | — | Physical business address |
-| `cuisineTypes` | `array[string]` | Optional | — | Array of cuisine specializations |
 
 ```json
 {
   "mobileNumber": "9812345678",
   "name": "Rajesh Sharma",
   "password": "VendorPassword@123",
-  "email": "info@royalcaters.com",
-  "businessName": "Royal Caterers & Event Planners",
-  "city": "Ahmedabad",
-  "address": "102 SG Highway, Ahmedabad",
-  "cuisineTypes": ["North Indian", "Gujarati", "Chinese", "Desserts"]
+  "email": "info@royalcaters.com"
 }
 ```
 
@@ -583,11 +574,7 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
     "vendor": {
       "id": "66f7d5b21b34c891e4a67891",
       "userId": "66f7d5b11b34c891e4a67890",
-      "businessName": "Royal Caterers & Event Planners",
       "ownerName": "Rajesh Sharma",
-      "city": "Ahmedabad",
-      "address": "102 SG Highway, Ahmedabad",
-      "cuisineTypes": ["North Indian", "Gujarati", "Chinese", "Desserts"],
       "status": "APPROVED",
       "createdAt": "2026-10-04T12:20:00.000Z",
       "updatedAt": "2026-10-04T12:20:00.000Z"

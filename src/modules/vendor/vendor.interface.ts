@@ -4,7 +4,7 @@ export type VendorStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface IVendor {
   userId: Types.ObjectId | string;
-  ownerName: string;
+  ownerName?: string;
   status: VendorStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -16,11 +16,6 @@ export interface CreateVendorDTO {
   mobileNumber: string;
   password?: string;
   name: string;
-  ownerName?: string;
   email?: string;
-  businessName?: string;
-  city?: string;
-  address?: string;
-  cuisineTypes?: string[];
 }
 

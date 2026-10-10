@@ -368,7 +368,7 @@ const swaggerDefinition = {
       },
       RegisterVendorRequest: {
         type: 'object',
-        required: ['mobileNumber', 'name', 'businessName'],
+        required: ['mobileNumber', 'name'],
         properties: {
           mobileNumber: {
             type: 'string',
@@ -382,12 +382,6 @@ const swaggerDefinition = {
             description: 'Vendor account owner name',
             example: 'Rajesh Sharma',
           },
-          businessName: {
-            type: 'string',
-            minLength: 2,
-            description: 'Catering / Vendor business name',
-            example: 'Royal Caterers & Event Planners',
-          },
           password: {
             type: 'string',
             minLength: 6,
@@ -399,27 +393,6 @@ const swaggerDefinition = {
             format: 'email',
             description: 'Business email address',
             example: 'info@royalcaters.com',
-          },
-          ownerName: {
-            type: 'string',
-            description: 'Owner contact name (Defaults to name)',
-            example: 'Rajesh Sharma',
-          },
-          city: {
-            type: 'string',
-            description: 'Operating city',
-            example: 'Ahmedabad',
-          },
-          address: {
-            type: 'string',
-            description: 'Physical business address',
-            example: '102 SG Highway, Ahmedabad',
-          },
-          cuisineTypes: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'Array of cuisine specializations',
-            example: ['North Indian', 'Gujarati', 'Chinese', 'Desserts'],
           },
         },
       },
