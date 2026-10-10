@@ -1,11 +1,18 @@
 import { Request } from 'express';
+import { UserRole } from '../constants/roles.js';
+
+export interface AuthUserPayload {
+  id: string;
+  mobileNumber: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  role: UserRole;
+}
 
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
+  user?: AuthUserPayload;
+  isAnonymous?: boolean;
 }
 
 export interface PaginationParams {
