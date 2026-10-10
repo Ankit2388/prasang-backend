@@ -39,7 +39,7 @@ export class ReviewService {
 
     const [reviews, total] = await Promise.all([
       ReviewModel.find(query)
-        .populate('user', 'name mobileNumber')
+        .populate('user', 'firstName lastName mobileNumber')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNum),
@@ -58,7 +58,7 @@ export class ReviewService {
   }
 
   public async getReviewById(id: string): Promise<IReviewDocument> {
-    const review = await ReviewModel.findById(id).populate('user', 'name mobileNumber');
+    const review = await ReviewModel.findById(id).populate('user', 'firstName lastName mobileNumber');
     if (!review) {
       throw new ApiError(StatusCodes.NOT_FOUND, `Review with ID ${id} not found`);
     }

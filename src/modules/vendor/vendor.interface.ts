@@ -15,7 +15,8 @@ export interface IVendorDocument extends IVendor, Document {}
 export interface CreateVendorDTO {
   mobileNumber: string;
   password?: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email?: string;
 }
 

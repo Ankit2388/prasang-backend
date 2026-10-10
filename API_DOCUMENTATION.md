@@ -285,7 +285,8 @@ All HTTP responses conform to standard JSON envelopes created by `ApiResponse` a
   "meta": {
     "isAnonymous": false,
     "user": {
-      "name": "Ankit Prajapati",
+      "firstName": "Ankit",
+      "lastName": "Prajapati",
       "role": "USER"
     }
   }
@@ -437,14 +438,16 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
 | Field | Type | Required | Validation Rules | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `mobileNumber` | `string` | **Yes** | Regex `/^[6-9]\d{9}$/` | Valid 10-digit Indian mobile number |
-| `name` | `string` | **Yes** | Min length: 2 | Full name of the user |
+| `firstName` | `string` | **Yes** | Min length: 1 | First name of the user |
+| `lastName` | `string` | **Yes** | Min length: 1 | Last name of the user |
 | `password` | `string` | Optional | Min length: 6 | Password (Required if `AUTH_MODE=password`) |
 | `email` | `string` | Optional | Valid email format | User email address |
 
 ```json
 {
   "mobileNumber": "9876543210",
-  "name": "Ankit Prajapati",
+  "firstName": "Ankit",
+  "lastName": "Prajapati",
   "password": "Password@123",
   "email": "ankit@example.com"
 }
@@ -460,7 +463,8 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
     "user": {
       "id": "66f7d0a21b34c891e4a12345",
       "mobileNumber": "9876543210",
-      "name": "Ankit Prajapati",
+      "firstName": "Ankit",
+      "lastName": "Prajapati",
       "email": "ankit@example.com",
       "role": "USER",
       "isActive": true,
@@ -508,7 +512,8 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
     "user": {
       "id": "66f7d0a21b34c891e4a12345",
       "mobileNumber": "9876543210",
-      "name": "Ankit Prajapati",
+      "firstName": "Ankit",
+      "lastName": "Prajapati",
       "email": "ankit@example.com",
       "role": "USER",
       "isActive": true,
@@ -541,14 +546,16 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
 | Field | Type | Required | Validation Rules | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `mobileNumber` | `string` | **Yes** | Indian 10-digit format | Vendor mobile number |
-| `name` | `string` | **Yes** | Min length: 2 | Account owner name |
+| `firstName` | `string` | **Yes** | Min length: 1 | Account owner first name |
+| `lastName` | `string` | **Yes** | Min length: 1 | Account owner last name |
 | `password` | `string` | Optional | Min length: 6 | Account password |
 | `email` | `string` | Optional | Email format | Business email address |
 
 ```json
 {
   "mobileNumber": "9812345678",
-  "name": "Rajesh Sharma",
+  "firstName": "Rajesh",
+  "lastName": "Sharma",
   "password": "VendorPassword@123",
   "email": "info@royalcaters.com"
 }
@@ -564,7 +571,8 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
     "user": {
       "id": "66f7d5b11b34c891e4a67890",
       "mobileNumber": "9812345678",
-      "name": "Rajesh Sharma",
+      "firstName": "Rajesh",
+      "lastName": "Sharma",
       "email": "info@royalcaters.com",
       "role": "VENDOR",
       "isActive": true,
@@ -615,7 +623,8 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
     "user": {
       "id": "66f7d5b11b34c891e4a67890",
       "mobileNumber": "9812345678",
-      "name": "Rajesh Sharma",
+      "firstName": "Rajesh",
+      "lastName": "Sharma",
       "email": "info@royalcaters.com",
       "role": "VENDOR",
       "isActive": true
@@ -668,7 +677,8 @@ Environment variables are validated at startup using **Zod** schema in `src/conf
     "user": {
       "id": "66f7c0011b34c891e4a00001",
       "mobileNumber": "9999999999",
-      "name": "System Administrator",
+      "firstName": "System",
+      "lastName": "Administrator",
       "email": "admin@prasang.com",
       "role": "SUPER_ADMIN",
       "isActive": true
@@ -827,7 +837,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     "user": {
       "id": "66f7d5b11b34c891e4a67890",
       "mobileNumber": "9812345678",
-      "name": "Rajesh Sharma",
+      "firstName": "Rajesh",
+      "lastName": "Sharma",
       "email": "info@royalcaters.com",
       "role": "VENDOR",
       "isActive": true,
@@ -871,7 +882,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     {
       "id": "66f7d0a21b34c891e4a12345",
       "mobileNumber": "9876543210",
-      "name": "Ankit Prajapati",
+      "firstName": "Ankit",
+      "lastName": "Prajapati",
       "email": "ankit@example.com",
       "role": "USER",
       "isActive": true,
@@ -906,7 +918,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "data": {
     "id": "66f7d0a21b34c891e4a12345",
     "mobileNumber": "9876543210",
-    "name": "Ankit Prajapati",
+    "firstName": "Ankit",
+    "lastName": "Prajapati",
     "email": "ankit@example.com",
     "role": "USER",
     "isActive": true,
@@ -933,7 +946,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```json
 {
   "mobileNumber": "9765432109",
-  "name": "John Doe",
+  "firstName": "John",
+  "lastName": "Doe",
   "email": "john@example.com",
   "password": "Password123",
   "role": "VENDOR"
@@ -949,7 +963,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "data": {
     "id": "66f7e1121b34c891e4a99999",
     "mobileNumber": "9765432109",
-    "name": "John Doe",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "john@example.com",
     "role": "VENDOR",
     "isActive": true,
@@ -1296,7 +1311,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "data": {
     "adminUser": {
       "id": "66f7c0011b34c891e4a00001",
-      "name": "System Administrator",
+      "firstName": "System",
+      "lastName": "Administrator",
       "role": "SUPER_ADMIN"
     },
     "totalUsers": 142,
@@ -1305,7 +1321,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     "recentUsers": [
       {
         "id": "66f7d0a21b34c891e4a12345",
-        "name": "Ankit Prajapati",
+        "firstName": "Ankit",
+        "lastName": "Prajapati",
         "mobileNumber": "9876543210",
         "role": "USER",
         "createdAt": "2026-10-04T12:10:00.000Z"

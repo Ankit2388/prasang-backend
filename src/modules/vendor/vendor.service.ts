@@ -22,7 +22,7 @@ export class VendorService {
 
   public async getAllApprovedVendors(): Promise<IVendorDocument[]> {
     return VendorModel.find({ status: 'APPROVED' })
-      .populate('userId', 'name mobileNumber email')
+      .populate('userId', 'firstName lastName mobileNumber email')
       .populate('business')
       .sort({ createdAt: -1 });
   }

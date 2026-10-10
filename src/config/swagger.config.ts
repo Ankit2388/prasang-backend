@@ -126,7 +126,8 @@ const swaggerDefinition = {
             type: 'object',
             nullable: true,
             properties: {
-              name: { type: 'string', example: 'Ankit Prajapati' },
+              firstName: { type: 'string', example: 'Ankit' },
+              lastName: { type: 'string', example: 'Prajapati' },
               role: { type: 'string', example: 'USER' },
             },
           },
@@ -139,7 +140,8 @@ const swaggerDefinition = {
         properties: {
           id: { type: 'string', example: '66f7d0a21b34c891e4a12345' },
           mobileNumber: { type: 'string', example: '9876543210' },
-          name: { type: 'string', example: 'Ankit Prajapati' },
+          firstName: { type: 'string', example: 'Ankit' },
+          lastName: { type: 'string', example: 'Prajapati' },
           email: { type: 'string', nullable: true, example: 'ankit@example.com' },
           role: {
             type: 'string',
@@ -316,7 +318,7 @@ const swaggerDefinition = {
       // Request Payloads
       RegisterUserRequest: {
         type: 'object',
-        required: ['mobileNumber', 'name'],
+        required: ['mobileNumber', 'firstName', 'lastName'],
         properties: {
           mobileNumber: {
             type: 'string',
@@ -324,11 +326,17 @@ const swaggerDefinition = {
             description: 'Valid 10-digit Indian mobile number',
             example: '9876543210',
           },
-          name: {
+          firstName: {
             type: 'string',
-            minLength: 2,
-            description: 'Full name of the user',
-            example: 'Ankit Prajapati',
+            minLength: 1,
+            description: 'First name of the user',
+            example: 'Ankit',
+          },
+          lastName: {
+            type: 'string',
+            minLength: 1,
+            description: 'Last name of the user',
+            example: 'Prajapati',
           },
           password: {
             type: 'string',
@@ -368,7 +376,7 @@ const swaggerDefinition = {
       },
       RegisterVendorRequest: {
         type: 'object',
-        required: ['mobileNumber', 'name'],
+        required: ['mobileNumber', 'firstName', 'lastName'],
         properties: {
           mobileNumber: {
             type: 'string',
@@ -376,11 +384,17 @@ const swaggerDefinition = {
             description: 'Valid 10-digit Indian mobile number',
             example: '9812345678',
           },
-          name: {
+          firstName: {
             type: 'string',
-            minLength: 2,
-            description: 'Vendor account owner name',
-            example: 'Rajesh Sharma',
+            minLength: 1,
+            description: 'Vendor account owner first name',
+            example: 'Rajesh',
+          },
+          lastName: {
+            type: 'string',
+            minLength: 1,
+            description: 'Vendor account owner last name',
+            example: 'Sharma',
           },
           password: {
             type: 'string',
@@ -482,17 +496,22 @@ const swaggerDefinition = {
       },
       CreateUserAdminRequest: {
         type: 'object',
-        required: ['mobileNumber', 'name'],
+        required: ['mobileNumber', 'firstName', 'lastName'],
         properties: {
           mobileNumber: {
             type: 'string',
             pattern: '^[6-9]\\d{9}$',
             example: '9765432109',
           },
-          name: {
+          firstName: {
             type: 'string',
-            minLength: 2,
-            example: 'John Doe',
+            minLength: 1,
+            example: 'John',
+          },
+          lastName: {
+            type: 'string',
+            minLength: 1,
+            example: 'Doe',
           },
           password: {
             type: 'string',
@@ -1594,7 +1613,8 @@ const swaggerDefinition = {
                           properties: {
                             id: { type: 'string', example: '66f7d0a21b34c891e4a12345' },
                             mobileNumber: { type: 'string', example: '9876543210' },
-                            name: { type: 'string', example: 'Ankit Prajapati' },
+                            firstName: { type: 'string', example: 'Ankit' },
+                            lastName: { type: 'string', example: 'Prajapati' },
                             role: { type: 'string', example: 'USER' },
                           },
                         },
@@ -1654,7 +1674,8 @@ const swaggerDefinition = {
                           type: 'object',
                           properties: {
                             id: { type: 'string', example: '66f7d5b11b34c891e4a67890' },
-                            name: { type: 'string', example: 'Rajesh Sharma' },
+                            firstName: { type: 'string', example: 'Rajesh' },
+                            lastName: { type: 'string', example: 'Sharma' },
                             role: { type: 'string', example: 'VENDOR' },
                           },
                         },
